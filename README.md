@@ -52,6 +52,30 @@ omp install .
 - Webhook 地址，例如 `https://open.feishu.cn/open-apis/bot/v2/hook/...`
 - 签名密钥
 
+### 使用 OMP 插件配置（推荐）
+
+安装插件后，可通过 OMP 的插件配置命令保存凭据，无需设置环境变量：
+
+```bash
+omp plugin config set omp-notify-feishu webhookUrl "https://open.feishu.cn/open-apis/bot/v2/hook/你的-webhook-id"
+omp plugin config set omp-notify-feishu signingSecret "你的签名密钥"
+```
+
+可选配置：
+
+```bash
+omp plugin config set omp-notify-feishu keyword "AI通知"
+omp plugin config set omp-notify-feishu timeoutMs 5000
+```
+
+查看当前配置：
+
+```bash
+omp plugin config list omp-notify-feishu
+```
+
+Webhook 和签名密钥会在 OMP 的配置界面与命令输出中隐藏。也可以在 OMP 的 `Settings → Plugins → omp-notify-feishu` 中配置这些字段。
+
 ### 使用环境变量
 
 ```bash
@@ -59,7 +83,7 @@ export FEISHU_WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/你的-w
 export FEISHU_SIGNING_SECRET="你的签名密钥"
 ```
 
-### 使用配置文件
+### 使用独立配置文件
 
 默认配置文件路径：
 
@@ -78,22 +102,13 @@ export FEISHU_SIGNING_SECRET="你的签名密钥"
 }
 ```
 
-配置字段：
-
-| 字段 | 必填 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `webhookUrl` | 是 | 无 | 飞书自定义机器人 Webhook 地址 |
-| `signingSecret` | 是 | 无 | 机器人签名密钥 |
-| `keyword` | 否 | `AI通知` | 通知首行关键词，可用于飞书关键词安全校验 |
-| `timeoutMs` | 否 | `5000` | 请求超时，范围为 1–30000 毫秒 |
-
 可通过 `FEISHU_NOTIFY_CONFIG` 指定其他配置文件：
 
 ```bash
 export FEISHU_NOTIFY_CONFIG="$HOME/.config/my-feishu-bot.json"
 ```
 
-`FEISHU_WEBHOOK_URL` 和 `FEISHU_SIGNING_SECRET` 的优先级高于配置文件中的对应字段。
+配置优先级为：环境变量、OMP 插件配置、独立配置文件。
 
 ## 使用
 

@@ -1,9 +1,12 @@
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
+import { getPluginSettings } from "@oh-my-pi/pi-coding-agent/extensibility/plugins";
 import {
   createCompletionNotification,
   loadFeishuConfig,
   sendFeishuNotification,
 } from "./src/feishu.ts";
+
+const PLUGIN_NAME = "omp-notify-feishu";
 
 export default function feishuNotifyExtension(pi: ExtensionAPI): void {
   let turnStartedAt = Date.now();
@@ -18,7 +21,8 @@ export default function feishuNotifyExtension(pi: ExtensionAPI): void {
     cwd: string,
     message?: string,
   ): Promise<void> => {
-    const config = await loadFeishuConfig();
+    const pluginSettings = await getPluginSettings(PLUGIN_NAME, cwd);
+    const config = await loadFeishuConfig({ pluginSettings });
     if (!config) {
       throw new Error("尚未配置飞书 Webhook 和签名密钥");
     }

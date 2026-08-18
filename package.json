@@ -1,6 +1,6 @@
 {
   "name": "omp-notify-feishu",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,33 @@
   "omp": {
     "extensions": [
       "./index.ts"
-    ]
+    ],
+    "settings": {
+      "webhookUrl": {
+        "type": "string",
+        "description": "飞书自定义机器人 Webhook 地址",
+        "secret": true,
+        "env": "FEISHU_WEBHOOK_URL"
+      },
+      "signingSecret": {
+        "type": "string",
+        "description": "飞书自定义机器人签名密钥",
+        "secret": true,
+        "env": "FEISHU_SIGNING_SECRET"
+      },
+      "keyword": {
+        "type": "string",
+        "description": "通知首行关键词，可用于飞书关键词安全校验",
+        "default": "AI通知"
+      },
+      "timeoutMs": {
+        "type": "number",
+        "description": "通知请求超时毫秒数",
+        "default": 5000,
+        "min": 1,
+        "max": 30000
+      }
+    }
   },
   "devDependencies": {
     "@oh-my-pi/pi-coding-agent": "17.3.4",

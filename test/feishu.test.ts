@@ -79,21 +79,47 @@ describe("通知正文", () => {
 });
 
 describe("配置加载", () => {
-  test("环境变量覆盖配置文件且凭据完整", async () => {
-    const loaded = await loadFeishuConfig(
-      {
+  test("环境变量凭据优先于 OMP 插件配置", async () => {
+    const loaded = await loadFeishuConfig({
+      env: {
         FEISHU_WEBHOOK_URL:
           "https://open.feishu.cn/open-apis/bot/v2/hook/from-env",
         FEISHU_SIGNING_SECRET: "env-secret",
       },
-      "/tmp/omp-notify-feishu-missing-config.json",
-    );
+      configPath: "/tmp/omp-notify-feishu-missing-config.json",
+      pluginSettings: {
+        webhookUrl:
+          "https://open.feishu.cn/open-apis/bot/v2/hook/from-omp",
+        signingSecret: "omp-secret",
+      },
+    });
 
     expect(loaded).toMatchObject({
       webhookUrl:
         "https://open.feishu.cn/open-apis/bot/v2/hook/from-env",
       signingSecret: "env-secret",
       keyword: "AI通知",
+    });
+  });
+
+  test("可仅使用 OMP 插件配置加载凭据", async () => {
+    const loaded = await loadFeishuConfig({
+      env: {},
+      configPath: "/tmp/omp-notify-feishu-missing-plugin-config.json",
+      pluginSettings: {
+        webhookUrl:
+          "https://open.feishu.cn/open-apis/bot/v2/hook/from-omp",
+        signingSecret: "omp-secret",
+        keyword: "任务通知",
+        timeoutMs: 2_500,
+      },
+    });
+
+    expect(loaded).toEqual({
+      webhookUrl: "https://open.feishu.cn/open-apis/bot/v2/hook/from-omp",
+      signingSecret: "omp-secret",
+      keyword: "任务通知",
+      timeoutMs: 2_500,
     });
   });
 });
