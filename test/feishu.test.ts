@@ -79,32 +79,36 @@ describe("通知正文", () => {
 });
 
 describe("配置加载", () => {
-  test("环境变量凭据优先于 OMP 插件配置", async () => {
-    const loaded = await loadFeishuConfig({
-      env: {
-        FEISHU_WEBHOOK_URL:
-          "https://open.feishu.cn/open-apis/bot/v2/hook/from-env",
-        FEISHU_SIGNING_SECRET: "env-secret",
-      },
-      configPath: "/tmp/omp-notify-feishu-missing-config.json",
-      pluginSettings: {
-        webhookUrl:
-          "https://open.feishu.cn/open-apis/bot/v2/hook/from-omp",
-        signingSecret: "omp-secret",
-      },
-    });
+  test("忽略遗留飞书环境变量", async () => {
+    const previousWebhookUrl = process.env.FEISHU_WEBHOOK_URL;
+    const previousSigningSecret = process.env.FEISHU_SIGNING_SECRET;
 
-    expect(loaded).toMatchObject({
-      webhookUrl:
-        "https://open.feishu.cn/open-apis/bot/v2/hook/from-env",
-      signingSecret: "env-secret",
-      keyword: "AI通知",
-    });
+    try {
+      process.env.FEISHU_WEBHOOK_URL =
+        "https://open.feishu.cn/open-apis/bot/v2/hook/from-env";
+      process.env.FEISHU_SIGNING_SECRET = "env-secret";
+
+      const loaded = await loadFeishuConfig({
+        configPath: "/tmp/omp-notify-feishu-missing-env-config.json",
+      });
+
+      expect(loaded).toBeUndefined();
+    } finally {
+      if (previousWebhookUrl === undefined) {
+        delete process.env.FEISHU_WEBHOOK_URL;
+      } else {
+        process.env.FEISHU_WEBHOOK_URL = previousWebhookUrl;
+      }
+      if (previousSigningSecret === undefined) {
+        delete process.env.FEISHU_SIGNING_SECRET;
+      } else {
+        process.env.FEISHU_SIGNING_SECRET = previousSigningSecret;
+      }
+    }
   });
 
   test("可仅使用 OMP 插件配置加载凭据", async () => {
     const loaded = await loadFeishuConfig({
-      env: {},
       configPath: "/tmp/omp-notify-feishu-missing-plugin-config.json",
       pluginSettings: {
         webhookUrl:
@@ -179,7 +183,13 @@ describe("扩展触发方式", () => {
         registeredTools.set(captured.name, captured);
       },
       registerCommand: (name: string) => registeredCommands.push(name),
-    } as unknown as ExtensionAPI);
+    } as unknown as ExtensionAPI, async () => ({
+      webhookUrl:
+        "https://open.feishu.cn/open-apis/bot/v2/hook/explicit-test",
+      signingSecret: "test-secret",
+      keyword: "AI通知",
+      timeoutMs: 5_000,
+    }));
 
     expect(registeredEvents).toEqual(["turn_start"]);
     expect(registeredCommands).toEqual(["feishu-notify"]);
@@ -189,18 +199,10 @@ describe("扩展触发方式", () => {
     expect(tool?.description).toContain("仅当用户明确要求");
     expect(tool?.loadMode).toBe("essential");
 
-    const previousConfigPath = process.env.FEISHU_NOTIFY_CONFIG;
-    const previousWebhookUrl = process.env.FEISHU_WEBHOOK_URL;
-    const previousSigningSecret = process.env.FEISHU_SIGNING_SECRET;
     const previousFetch = globalThis.fetch;
     let sentBody: Record<string, unknown> | undefined;
 
     try {
-      process.env.FEISHU_NOTIFY_CONFIG =
-        "/tmp/omp-notify-feishu-explicit-test-missing.json";
-      process.env.FEISHU_WEBHOOK_URL =
-        "https://open.feishu.cn/open-apis/bot/v2/hook/explicit-test";
-      process.env.FEISHU_SIGNING_SECRET = "test-secret";
       globalThis.fetch = (async (
         _input: string | URL | Request,
         init?: RequestInit,
@@ -229,21 +231,6 @@ describe("扩展触发方式", () => {
       expect(readPayloadText(sentBody ?? {})).not.toContain("AI 任务已完成");
     } finally {
       globalThis.fetch = previousFetch;
-      if (previousConfigPath === undefined) {
-        delete process.env.FEISHU_NOTIFY_CONFIG;
-      } else {
-        process.env.FEISHU_NOTIFY_CONFIG = previousConfigPath;
-      }
-      if (previousWebhookUrl === undefined) {
-        delete process.env.FEISHU_WEBHOOK_URL;
-      } else {
-        process.env.FEISHU_WEBHOOK_URL = previousWebhookUrl;
-      }
-      if (previousSigningSecret === undefined) {
-        delete process.env.FEISHU_SIGNING_SECRET;
-      } else {
-        process.env.FEISHU_SIGNING_SECRET = previousSigningSecret;
-      }
     }
   });
 });

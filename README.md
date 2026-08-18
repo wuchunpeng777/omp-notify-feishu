@@ -11,7 +11,7 @@
 - 支持自定义通知正文
 - 使用飞书自定义机器人 HMAC-SHA256 签名
 - 通知包含项目名、当前轮耗时、完成时间和主机名
-- 支持环境变量和 JSON 配置文件
+- 支持 OMP 插件配置和 JSON 配置文件
 - 校验飞书响应中的 HTTP 状态和业务状态码
 
 ## 前置条件
@@ -54,7 +54,7 @@ omp install .
 
 ### 使用 OMP 插件配置（推荐）
 
-安装插件后，可通过 OMP 的插件配置命令保存凭据，无需设置环境变量：
+安装插件后，可通过 OMP 的插件配置命令保存凭据：
 
 ```bash
 omp plugin config set omp-notify-feishu webhookUrl "https://open.feishu.cn/open-apis/bot/v2/hook/你的-webhook-id"
@@ -76,13 +76,6 @@ omp plugin config list omp-notify-feishu
 
 Webhook 和签名密钥会在 OMP 的配置界面与命令输出中隐藏。也可以在 OMP 的 `Settings → Plugins → omp-notify-feishu` 中配置这些字段。
 
-### 使用环境变量
-
-```bash
-export FEISHU_WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/你的-webhook-id"
-export FEISHU_SIGNING_SECRET="你的签名密钥"
-```
-
 ### 使用独立配置文件
 
 默认配置文件路径：
@@ -102,13 +95,7 @@ export FEISHU_SIGNING_SECRET="你的签名密钥"
 }
 ```
 
-可通过 `FEISHU_NOTIFY_CONFIG` 指定其他配置文件：
-
-```bash
-export FEISHU_NOTIFY_CONFIG="$HOME/.config/my-feishu-bot.json"
-```
-
-配置优先级为：环境变量、OMP 插件配置、独立配置文件。
+配置优先级为：OMP 插件配置、独立配置文件。
 
 ## 使用
 
@@ -150,7 +137,7 @@ AI通知
 ## 安全说明
 
 - 不要把 Webhook 地址或签名密钥提交到 Git 仓库
-- `.env` 文件已被 Git 忽略，但本扩展不会自动加载 `.env`；请由 Shell、进程管理器或其他安全配置方式注入环境变量
+- OMP 插件配置保存在本机，请限制配置文件访问权限并避免复制到公开位置
 - 建议同时启用飞书机器人的签名校验和关键词校验
 - `feishu_notify` 是外部写操作，OMP 会按当前审批策略处理工具调用
 

@@ -8,7 +8,10 @@ import {
 
 const PLUGIN_NAME = "omp-notify-feishu";
 
-export default function feishuNotifyExtension(pi: ExtensionAPI): void {
+export default function feishuNotifyExtension(
+  pi: ExtensionAPI,
+  loadPluginSettings: typeof getPluginSettings = getPluginSettings,
+): void {
   let turnStartedAt = Date.now();
 
   pi.setLabel("飞书按需通知");
@@ -21,7 +24,7 @@ export default function feishuNotifyExtension(pi: ExtensionAPI): void {
     cwd: string,
     message?: string,
   ): Promise<void> => {
-    const pluginSettings = await getPluginSettings(PLUGIN_NAME, cwd);
+    const pluginSettings = await loadPluginSettings(PLUGIN_NAME, cwd);
     const config = await loadFeishuConfig({ pluginSettings });
     if (!config) {
       throw new Error("尚未配置飞书 Webhook 和签名密钥");

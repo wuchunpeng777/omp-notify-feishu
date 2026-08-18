@@ -1,6 +1,6 @@
 {
   "name": "omp-notify-feishu",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,14 +16,12 @@
       "webhookUrl": {
         "type": "string",
         "description": "飞书自定义机器人 Webhook 地址",
-        "secret": true,
-        "env": "FEISHU_WEBHOOK_URL"
+        "secret": true
       },
       "signingSecret": {
         "type": "string",
         "description": "飞书自定义机器人签名密钥",
-        "secret": true,
-        "env": "FEISHU_SIGNING_SECRET"
+        "secret": true
       },
       "keyword": {
         "type": "string",

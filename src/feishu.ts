@@ -34,7 +34,6 @@ interface RawConfig {
 }
 
 export interface LoadFeishuConfigOptions {
-  env?: NodeJS.ProcessEnv;
   configPath?: string;
   pluginSettings?: Record<string, unknown>;
 }
@@ -118,12 +117,9 @@ async function readConfigFile(path: string): Promise<RawConfig | undefined> {
 export async function loadFeishuConfig(
   options: LoadFeishuConfigOptions = {},
 ): Promise<FeishuConfig | undefined> {
-  const env = options.env ?? process.env;
-  const configPath =
-    options.configPath ?? env.FEISHU_NOTIFY_CONFIG ?? DEFAULT_CONFIG_PATH;
-  const fileConfig = await readConfigFile(configPath);
-  const webhookUrl = readString(env.FEISHU_WEBHOOK_URL);
-  const signingSecret = readString(env.FEISHU_SIGNING_SECRET);
+  const fileConfig = await readConfigFile(
+    options.configPath ?? DEFAULT_CONFIG_PATH,
+  );
   const pluginWebhookUrl = readString(options.pluginSettings?.webhookUrl);
   const pluginSigningSecret = readString(options.pluginSettings?.signingSecret);
   const pluginKeyword = readString(options.pluginSettings?.keyword);
@@ -131,8 +127,6 @@ export async function loadFeishuConfig(
 
   if (
     !fileConfig &&
-    !webhookUrl &&
-    !signingSecret &&
     !pluginWebhookUrl &&
     !pluginSigningSecret &&
     !pluginKeyword &&
@@ -142,9 +136,8 @@ export async function loadFeishuConfig(
   }
 
   return normalizeConfig({
-    webhookUrl: webhookUrl ?? pluginWebhookUrl ?? fileConfig?.webhookUrl,
-    signingSecret:
-      signingSecret ?? pluginSigningSecret ?? fileConfig?.signingSecret,
+    webhookUrl: pluginWebhookUrl ?? fileConfig?.webhookUrl,
+    signingSecret: pluginSigningSecret ?? fileConfig?.signingSecret,
     keyword: pluginKeyword ?? fileConfig?.keyword,
     timeoutMs: pluginTimeoutMs ?? fileConfig?.timeoutMs,
   });
