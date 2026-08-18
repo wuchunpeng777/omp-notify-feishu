@@ -22,21 +22,28 @@
 
 ## 安装
 
-克隆仓库并安装依赖：
+### 从 GitHub 直接安装（推荐）
+
+```bash
+omp install github:wuchunpeng777/omp-notify-feishu
+```
+
+也可以使用完整仓库地址：
+
+```bash
+omp install https://github.com/wuchunpeng777/omp-notify-feishu
+```
+
+### 从源码安装
 
 ```bash
 git clone https://github.com/wuchunpeng777/omp-notify-feishu.git
 cd omp-notify-feishu
 bun install
-```
-
-将当前目录链接为 OMP 扩展：
-
-```bash
 omp install .
 ```
 
-重新启动 OMP，或在已有会话中重新加载插件。
+安装完成后，重新启动 OMP，或在已有会话中重新加载插件。
 
 ## 配置飞书机器人
 
