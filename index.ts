@@ -41,7 +41,7 @@ export default function feishuNotifyExtension(
     );
   };
   const notificationParameters = pi.zod.object({
-    message: pi.zod.string().min(1).default("").describe("自定义通知正文"),
+    message: pi.zod.string().min(1).optional().describe("自定义通知正文"),
   });
 
   pi.registerTool({
